@@ -1,4 +1,7 @@
 .venv
+<<<<<<< model-development
+__pycache__
+=======
 .env
 __pycache__/
 
@@ -26,3 +29,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+>>>>>>> main
