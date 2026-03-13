@@ -11,12 +11,20 @@ class ActionType(enum.Enum):
     SELL = "SELL"
 
 
+class UserRole(enum.Enum):
+    USER = "USER"
+    ADMIN = "ADMIN"
+
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    firebase_token = db.Column(db.String(255), nullable=True)
+    firebase_token = db.Column(db.String(255), nullable=False)
     api_key = db.Column(db.String(255), nullable=True, unique=True)
     wallet = db.Column(Numeric(18, 8), nullable=False, default=0)
+    role = db.Column(db.Enum(UserRole, name='user_role'), nullable=False, default=UserRole.USER)
+    createdAt = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
+    updatedAt = db.Column(db.DateTime, nullable=False, server_default=db.func.now(), onupdate=db.func.now())
 
     sessions = db.relationship('Session', back_populates='user', cascade='all, delete-orphan')
 
