@@ -31,8 +31,8 @@ class User(db.Model):
     alpaca_secret = db.Column(db.String(255), nullable=True)
     wallet = db.Column(Numeric(18, 8), nullable=False, default=0)
     role = db.Column(db.Enum(UserRole, name='user_role'), nullable=False, default=UserRole.USER)
-    createdAt = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
-    updatedAt = db.Column(db.DateTime, nullable=False, server_default=db.func.now(), onupdate=db.func.now())
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now(), onupdate=db.func.now())
 
     sessions = db.relationship('Session', back_populates='user', cascade='all, delete-orphan')
 
@@ -54,7 +54,6 @@ class Action(db.Model):
     __tablename__ = 'trades'
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'), nullable=False, index=True)
-    sum = db.Column(Numeric(18, 8), nullable=False)
     price = db.Column(Numeric(18, 8), nullable=False)
     quantity = db.Column(Numeric(18, 8), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
