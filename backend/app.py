@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from dotenv import load_dotenv
 import os
 from backend.database.models import db
+from backend.routes.users import users_bp
 from flask_migrate import Migrate
 
 load_dotenv()
@@ -19,6 +20,8 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
+    
+    app.register_blueprint(users_bp)
 
     @app.route('/health')
     def health():
