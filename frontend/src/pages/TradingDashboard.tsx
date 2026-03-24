@@ -4,8 +4,21 @@ export function TradingDashboard() {
     const [isBotRunning, setIsBotRunning] = useState(false);
     const [apiKey, setApiKey] = useState("");
     const [investmentAmount, setInvestmentAmount] = useState("");
-    const isFormValid = apiKey.trim() !== "" && investmentAmount.trim() !== "";
     const [showApiKey, setShowApiKey] = useState(false);
+    const [maxLoss, setMaxLoss] = useState("");
+    const [duration, setDuration] = useState("1h");
+    
+    const tradingSettings = {
+        apiKey,
+        investmentAmount,
+        maxLoss,
+        duration,
+    };
+    
+    const isFormValid =
+        apiKey.trim() !== "" &&
+        investmentAmount.trim() !== "" &&
+        maxLoss.trim() !== "";
 
     const handleToggleBot = () => {
         if (!isBotRunning && !isFormValid) {
@@ -74,6 +87,38 @@ export function TradingDashboard() {
                             }}
                             disabled={isBotRunning}
                         />
+                </div>
+
+                <div>
+                    <label htmlFor="maxLoss">Maximum Loss ($)</label>
+                    <input
+                        id="maxLoss"
+                        type="number"
+                        placeholder="e.g. 500"
+                        value={maxLoss}
+                        onChange={(event) => {
+                        setMaxLoss(event.target.value);
+                        }}
+                        disabled={isBotRunning}
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="duration">Duration</label>
+
+                    <select
+                        id="duration"
+                        value={duration}
+                        onChange={(event) => {
+                        setDuration(event.target.value);
+                        }}
+                        disabled={isBotRunning}
+                    >
+                        <option value="1h">1 Hour</option>
+                        <option value="4h">4 Hours</option>
+                        <option value="8h">8 Hours</option>
+                        <option value="24h">24 Hours</option>
+                    </select>
                 </div>
 
             </section>
