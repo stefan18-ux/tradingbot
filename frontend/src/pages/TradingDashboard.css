@@ -1,0 +1,7 @@
+.trading-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 20px;
+  background: #f6f8fb;
+  min-height: 100vh;
+}

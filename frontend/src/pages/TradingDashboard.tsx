@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./TradingDashboard.css";
 
 export function TradingDashboard() {
     const [isBotRunning, setIsBotRunning] = useState(false);
@@ -14,7 +15,7 @@ export function TradingDashboard() {
         maxLoss,
         duration,
     };
-    
+
     const isFormValid =
         apiKey.trim() !== "" &&
         investmentAmount.trim() !== "" &&
@@ -33,99 +34,101 @@ export function TradingDashboard() {
     };
 
     return (
-        <div>
-            <h1>Trading Dashboard</h1>
+        <div className="trading-page">
+            <div>
+                <h1>Trading Dashboard</h1>
 
-            <section>
-                <h2>Bot Status</h2>
+                <section>
+                    <h2>Bot Status</h2>
 
-                <p>
-                    Status: {isBotRunning ? "Running" : "Stopped"}
-                </p>
+                    <p>
+                        Status: {isBotRunning ? "Running" : "Stopped"}
+                    </p>
 
-                <button
-                    onClick={handleToggleBot}
-                    disabled={!isBotRunning && !isFormValid}
-                >
-                    {isBotRunning ? "Stop Trading" : "Start Trading"}
-                </button>
-            </section>
+                    <button
+                        onClick={handleToggleBot}
+                        disabled={!isBotRunning && !isFormValid}
+                    >
+                        {isBotRunning ? "Stop Trading" : "Start Trading"}
+                    </button>
+                </section>
 
-            <section>
-                <h2>Trading Settings</h2>
-
-                <div>
-                    <label htmlFor="apiKey">Trading API Key</label>
+                <section>
+                    <h2>Trading Settings</h2>
 
                     <div>
-                        <input
-                        id="apiKey"
-                        type={showApiKey ? "text" : "password"}
-                        value={apiKey}
-                        onChange={(event) => {
-                            setApiKey(event.target.value);
-                        }}
-                        placeholder="Enter your API key"
-                        disabled={isBotRunning}
-                        />
+                        <label htmlFor="apiKey">Trading API Key</label>
 
-                        <button type="button" onClick={handleToggleApiKeyVisibility}>
-                            {showApiKey ? "Hide" : "Show"}
-                        </button>
-                </div>
-            
-                </div>
-                    <div>
-                        <label htmlFor="investment">Investment Amount ($)</label>
-                        <input
-                            id="investment"
-                            type="number"
-                            placeholder="e.g. 5000"
-                            value={investmentAmount}
+                        <div>
+                            <input
+                            id="apiKey"
+                            type={showApiKey ? "text" : "password"}
+                            value={apiKey}
                             onChange={(event) => {
-                                setInvestmentAmount(event.target.value);
+                                setApiKey(event.target.value);
+                            }}
+                            placeholder="Enter your API key"
+                            disabled={isBotRunning}
+                            />
+
+                            <button type="button" onClick={handleToggleApiKeyVisibility}>
+                                {showApiKey ? "Hide" : "Show"}
+                            </button>
+                    </div>
+                
+                    </div>
+                        <div>
+                            <label htmlFor="investment">Investment Amount ($)</label>
+                            <input
+                                id="investment"
+                                type="number"
+                                placeholder="e.g. 5000"
+                                value={investmentAmount}
+                                onChange={(event) => {
+                                    setInvestmentAmount(event.target.value);
+                                }}
+                                disabled={isBotRunning}
+                            />
+                    </div>
+
+                    <div>
+                        <label htmlFor="maxLoss">Maximum Loss ($)</label>
+                        <input
+                            id="maxLoss"
+                            type="number"
+                            placeholder="e.g. 500"
+                            value={maxLoss}
+                            onChange={(event) => {
+                            setMaxLoss(event.target.value);
                             }}
                             disabled={isBotRunning}
                         />
-                </div>
+                    </div>
 
-                <div>
-                    <label htmlFor="maxLoss">Maximum Loss ($)</label>
-                    <input
-                        id="maxLoss"
-                        type="number"
-                        placeholder="e.g. 500"
-                        value={maxLoss}
-                        onChange={(event) => {
-                        setMaxLoss(event.target.value);
-                        }}
-                        disabled={isBotRunning}
-                    />
-                </div>
+                    <div>
+                        <label htmlFor="duration">Duration</label>
 
-                <div>
-                    <label htmlFor="duration">Duration</label>
+                        <select
+                            id="duration"
+                            value={duration}
+                            onChange={(event) => {
+                            setDuration(event.target.value);
+                            }}
+                            disabled={isBotRunning}
+                        >
+                            <option value="1h">1 Hour</option>
+                            <option value="4h">4 Hours</option>
+                            <option value="8h">8 Hours</option>
+                            <option value="24h">24 Hours</option>
+                        </select>
+                    </div>
 
-                    <select
-                        id="duration"
-                        value={duration}
-                        onChange={(event) => {
-                        setDuration(event.target.value);
-                        }}
-                        disabled={isBotRunning}
-                    >
-                        <option value="1h">1 Hour</option>
-                        <option value="4h">4 Hours</option>
-                        <option value="8h">8 Hours</option>
-                        <option value="24h">24 Hours</option>
-                    </select>
-                </div>
+                </section>
 
-            </section>
-
-            <section>
-                <h2>Current Session</h2>
-            </section>
+                <section>
+                    <h2>Current Session</h2>
+                </section>
+            </div>
         </div>
     );
 }
