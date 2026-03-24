@@ -8,7 +8,7 @@ export function TradingDashboard() {
     const [showApiKey, setShowApiKey] = useState(false);
     const [maxLoss, setMaxLoss] = useState("");
     const [duration, setDuration] = useState("1h");
-    
+
     const tradingSettings = {
         apiKey,
         investmentAmount,
@@ -50,6 +50,7 @@ export function TradingDashboard() {
                         </p>
 
                         <button
+                            className={isBotRunning ? "btn stop" : "btn start"}
                             onClick={handleToggleBot}
                             disabled={!isBotRunning && !isFormValid}
                         >
@@ -81,8 +82,8 @@ export function TradingDashboard() {
                                 </button>
                             </div>
                         </div>
-                        
-                    
+
+
                         <div className="form-group">
                             <label htmlFor="investment">Investment Amount ($)</label>
                             <input
@@ -98,7 +99,7 @@ export function TradingDashboard() {
                             />
                         </div>
 
-                       <div className="form-group">
+                        <div className="form-group">
                             <label htmlFor="maxLoss">Maximum Loss ($)</label>
                             <input
                                 className="form-input"
@@ -107,7 +108,7 @@ export function TradingDashboard() {
                                 placeholder="e.g. 500"
                                 value={maxLoss}
                                 onChange={(event) => {
-                                setMaxLoss(event.target.value);
+                                    setMaxLoss(event.target.value);
                                 }}
                                 disabled={isBotRunning}
                             />
@@ -121,7 +122,7 @@ export function TradingDashboard() {
                                 id="duration"
                                 value={duration}
                                 onChange={(event) => {
-                                setDuration(event.target.value);
+                                    setDuration(event.target.value);
                                 }}
                                 disabled={isBotRunning}
                             >
