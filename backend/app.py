@@ -4,6 +4,7 @@ import os
 from database.models import db
 from routes.users import users_bp
 from routes.trades import trades_bp
+from routes.sessions import sessions_bp
 from flask_migrate import Migrate
 
 load_dotenv()
@@ -24,6 +25,7 @@ def create_app():
     
     app.register_blueprint(users_bp)
     app.register_blueprint(trades_bp)
+    app.register_blueprint(sessions_bp)
 
     @app.route('/health')
     def health():
