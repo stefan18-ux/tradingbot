@@ -1,5 +1,5 @@
-from backend.app import create_app
-from backend.database.models import db
+from app import create_app
+from database.models import db
 
 
 def init_db():

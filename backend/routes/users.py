@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from backend.database.models import db, User, UserRole
+from database.models import db, User, UserRole
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from decimal import Decimal

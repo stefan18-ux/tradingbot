@@ -1,8 +1,8 @@
 from flask import Flask, jsonify
 from dotenv import load_dotenv
 import os
-from backend.database.models import db
-from backend.routes.users import users_bp
+from database.models import db
+from routes.users import users_bp
 from flask_migrate import Migrate
 
 load_dotenv()
