@@ -3,14 +3,14 @@ import { useState } from "react";
 export function TradingDashboard() {
   const [isBotRunning, setIsBotRunning] = useState(false);
   const [apiKey, setApiKey] = useState("");
+  const [investmentAmount, setInvestmentAmount] = useState("");
+  const isFormValid = apiKey.trim() !== "" && investmentAmount.trim() !== "";
 
   const handleToggleBot = () => {
-        if (!isBotRunning) {
-            // if no api_key is introduced, the button doesn't work
-            if (apiKey === "") {
-                return; 
-            }
+         if (!isBotRunning && !isFormValid) {
+            return;
         }
+
         setIsBotRunning(!isBotRunning);
     };
 
@@ -27,7 +27,7 @@ export function TradingDashboard() {
 
         <button
             onClick={handleToggleBot}
-            disabled={!isBotRunning && apiKey === ""}
+            disabled={!isBotRunning && !isFormValid}
             >
             {isBotRunning ? "Stop Trading" : "Start Trading"}
         </button>
@@ -47,6 +47,20 @@ export function TradingDashboard() {
           }}
           disabled={isBotRunning}
         />
+
+        <div>
+            <label htmlFor="investment">Investment Amount ($)</label>
+            <input
+                id="investment"
+                type="number"
+                placeholder="e.g. 5000"
+                value={investmentAmount}
+                onChange={(event) => {
+                setInvestmentAmount(event.target.value);
+                }}
+                disabled={isBotRunning}
+            />
+        </div>
       </section>
 
       <section>
