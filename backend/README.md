@@ -1,6 +1,6 @@
-# MySQL Docker setup
+# Database Setup
 
-This repository includes a minimal Docker Compose setup to run a MySQL 8.0 container for local development.
+## MySQL Docker setup
 
 Files added:
 
@@ -14,3 +14,13 @@ How to run it:
 - run the container using `docker compose up -d`
 - you can use the **Database Client** extension in VSCode to view the tables and query the data
 - to stop the container use `docker compose down`
+
+## Init DB
+- create a virtual environment using the `venv-setup.sh` script
+- activate the venv using `source` (see the output of the previous script)
+- to initialize the db, run the `database/init_db.py` script
+
+## Seed DB
+- run the `database/seed_db.py` script to insert a compact dev dataset
+- the seed creates 5 users (1 admin), minimal sessions for all statuses, and a small set of trades covering BUY/SELL
+- rerunning the seed replaces only previously seeded users (firebase_uid prefixed with `seed_`) and their related sessions/trades
