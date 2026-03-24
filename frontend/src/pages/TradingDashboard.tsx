@@ -1,7 +1,12 @@
 import { useState } from "react";
 
 export function TradingDashboard() {
-  const [botRunning, setBotRunning] = useState(false);
+  const [isBotRunning, setIsBotRunning] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+
+  const handleToggleBot = () => {
+    setIsBotRunning(!isBotRunning);
+  };
 
   return (
     <div>
@@ -10,15 +15,29 @@ export function TradingDashboard() {
       <section>
         <h2>Bot Status</h2>
 
-        <p>Status: {botRunning ? "Running" : "Stopped"}</p>
+        <p>
+          Status: {isBotRunning ? "Running" : "Stopped"}
+        </p>
 
-        <button onClick={() => setBotRunning(!botRunning)}>
-          {botRunning ? "Stop Trading" : "Start Trading"}
+        <button onClick={handleToggleBot}>
+          {isBotRunning ? "Stop Trading" : "Start Trading"}
         </button>
       </section>
 
       <section>
         <h2>Trading Settings</h2>
+
+        <label htmlFor="apiKey">Trading API Key</label>
+        <input
+          id="apiKey"
+          type="text"
+          placeholder="Enter your API key"
+          value={apiKey}
+          onChange={(event) => {
+            setApiKey(event.target.value);
+          }}
+          disabled={isBotRunning}
+        />
       </section>
 
       <section>
