@@ -42,7 +42,7 @@ export function TradingDashboard() {
                         <p>Manage your trading session and settings.</p>
                     </header>
 
-                    <section>
+                    <section className="card">
                         <h2>Bot Status</h2>
 
                         <p>
@@ -57,7 +57,7 @@ export function TradingDashboard() {
                         </button>
                     </section>
 
-                    <section>
+                    <section className="card">
                         <h2>Trading Settings</h2>
 
                         <div>
@@ -129,7 +129,7 @@ export function TradingDashboard() {
 
                     </section>
 
-                    <section>
+                    <section className="card">
                         <h2>Current Session</h2>
                     </section>
                 </div>
