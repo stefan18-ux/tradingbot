@@ -60,44 +60,48 @@ export function TradingDashboard() {
                     <section className="card">
                         <h2>Trading Settings</h2>
 
-                        <div>
+                        <div className="form-group">
                             <label htmlFor="apiKey">Trading API Key</label>
 
-                            <div>
+                            <div className="input-row">
                                 <input
-                                id="apiKey"
-                                type={showApiKey ? "text" : "password"}
-                                value={apiKey}
-                                onChange={(event) => {
-                                    setApiKey(event.target.value);
-                                }}
-                                placeholder="Enter your API key"
-                                disabled={isBotRunning}
+                                    className="form-input"
+                                    id="apiKey"
+                                    type={showApiKey ? "text" : "password"}
+                                    value={apiKey}
+                                    onChange={(event) => {
+                                        setApiKey(event.target.value);
+                                    }}
+                                    placeholder="Enter your API key"
+                                    disabled={isBotRunning}
                                 />
 
                                 <button type="button" onClick={handleToggleApiKeyVisibility}>
                                     {showApiKey ? "Hide" : "Show"}
                                 </button>
+                            </div>
                         </div>
+                        
                     
-                        </div>
-                            <div>
-                                <label htmlFor="investment">Investment Amount ($)</label>
-                                <input
-                                    id="investment"
-                                    type="number"
-                                    placeholder="e.g. 5000"
-                                    value={investmentAmount}
-                                    onChange={(event) => {
-                                        setInvestmentAmount(event.target.value);
-                                    }}
-                                    disabled={isBotRunning}
-                                />
+                        <div className="form-group">
+                            <label htmlFor="investment">Investment Amount ($)</label>
+                            <input
+                                className="form-input"
+                                id="investment"
+                                type="number"
+                                placeholder="e.g. 5000"
+                                value={investmentAmount}
+                                onChange={(event) => {
+                                    setInvestmentAmount(event.target.value);
+                                }}
+                                disabled={isBotRunning}
+                            />
                         </div>
 
-                        <div>
+                       <div className="form-group">
                             <label htmlFor="maxLoss">Maximum Loss ($)</label>
                             <input
+                                className="form-input"
                                 id="maxLoss"
                                 type="number"
                                 placeholder="e.g. 500"
@@ -109,10 +113,11 @@ export function TradingDashboard() {
                             />
                         </div>
 
-                        <div>
+                        <div className="form-group">
                             <label htmlFor="duration">Duration</label>
 
                             <select
+                                className="form-input"
                                 id="duration"
                                 value={duration}
                                 onChange={(event) => {
