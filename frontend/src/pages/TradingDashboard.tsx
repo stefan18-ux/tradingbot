@@ -5,8 +5,14 @@ export function TradingDashboard() {
   const [apiKey, setApiKey] = useState("");
 
   const handleToggleBot = () => {
-    setIsBotRunning(!isBotRunning);
-  };
+        if (!isBotRunning) {
+            // if no api_key is introduced, the button doesn't work
+            if (apiKey === "") {
+                return; 
+            }
+        }
+        setIsBotRunning(!isBotRunning);
+    };
 
   return (
     <div>
@@ -19,8 +25,11 @@ export function TradingDashboard() {
           Status: {isBotRunning ? "Running" : "Stopped"}
         </p>
 
-        <button onClick={handleToggleBot}>
-          {isBotRunning ? "Stop Trading" : "Start Trading"}
+        <button
+            onClick={handleToggleBot}
+            disabled={!isBotRunning && apiKey === ""}
+            >
+            {isBotRunning ? "Stop Trading" : "Start Trading"}
         </button>
       </section>
 
