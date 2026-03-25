@@ -15,6 +15,7 @@ from database.models import (
     User,
     UserRole,
 )
+from utils.encryption import encrypt_secret
 
 
 def _dt(hours_ago: int) -> datetime:
@@ -76,6 +77,9 @@ def seed_db() -> None:
 
         users_by_uid = {}
         for user_data in users_data:
+            if user_data.get("alpaca_secret") is not None:
+                user_data["alpaca_secret"] = encrypt_secret(user_data["alpaca_secret"])
+
             user = User(**user_data)
             db.session.add(user)
             users_by_uid[user_data["firebase_uid"]] = user
