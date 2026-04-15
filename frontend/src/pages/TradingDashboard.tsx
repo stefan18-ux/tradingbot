@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./TradingDashboard.css";
 
 export function TradingDashboard() {
     const [botRunning, setBotRunning] = useState(false);
+    const [seconds, setSeconds] = useState(0);
     const [showApiKey, setShowApiKey] = useState(false);
 
     const [settings, setSettings] = useState({
@@ -17,12 +18,31 @@ export function TradingDashboard() {
         settings.investmentAmount.trim() !== "" &&
         settings.maxLoss.trim() !== "";
 
-    const handleStartStop = () => {
-        if (!botRunning && !isFormValid) {
-            return;
+    useEffect(() => {
+        let timer;
+
+        if (botRunning) {
+            timer = setInterval(() => {
+                setSeconds((prevSeconds) => prevSeconds + 1);
+            }, 1000);
         }
 
-        setBotRunning(!botRunning);
+        return () => {
+            clearInterval(timer);
+        };
+    }, [botRunning]);
+
+    const handleStartStop = () => {
+        if (botRunning) {
+            setBotRunning(false);
+            setSeconds(0);
+        } else {
+            if (!isFormValid) {
+                return;
+            }
+
+            setBotRunning(true);
+        }
     };
 
     const handleToggleApiKeyVisibility = () => {
@@ -57,6 +77,18 @@ export function TradingDashboard() {
         });
     };
 
+    const formatTime = () => {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+
+        const hoursText = String(hours).padStart(2, "0");
+        const minutesText = String(minutes).padStart(2, "0");
+        const secondsText = String(secs).padStart(2, "0");
+
+        return hoursText + ":" + minutesText + ":" + secondsText;
+    };
+
     return (
         <div className="trading-page">
             <div className="trading-container">
@@ -66,10 +98,20 @@ export function TradingDashboard() {
                         <p>Manage your trading session and settings.</p>
                     </header>
 
+                    {/* BOT STATUS */}
                     <section className="card">
-                        <h2>Bot Status</h2>
+                        <div className="status-row">
+                            <span>Status</span>
+                            <span className={botRunning ? "status running" : "status stopped"}>
+                                {botRunning ? "Running" : "Stopped"}
+                            </span>
+                        </div>
 
-                        <p>Status: {botRunning ? "Running" : "Stopped"}</p>
+                        {!isFormValid && !botRunning && (
+                            <div className="warning">
+                                Please complete all fields before starting trading
+                            </div>
+                        )}
 
                         <button
                             className={botRunning ? "btn stop" : "btn start"}
@@ -80,6 +122,7 @@ export function TradingDashboard() {
                         </button>
                     </section>
 
+                    {/* SETTINGS */}
                     <section className="card">
                         <h2>Trading Settings</h2>
 
@@ -147,8 +190,15 @@ export function TradingDashboard() {
                         </div>
                     </section>
 
+                    {/* SESSION */}
                     <section className="card">
-                        <h2>Current Session</h2>
+                        <h2>Current Session {botRunning ? "(Active)" : ""}</h2>
+
+                        {botRunning ? (
+                            <p className="session-time">{formatTime()}</p>
+                        ) : (
+                            <p>No active trading session.</p>
+                        )}
                     </section>
                 </div>
             </div>
