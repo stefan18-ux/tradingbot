@@ -2,35 +2,38 @@ import { useState } from "react";
 import "./TradingDashboard.css";
 
 export function TradingDashboard() {
-    const [isBotRunning, setIsBotRunning] = useState(false);
-    const [apiKey, setApiKey] = useState("");
-    const [investmentAmount, setInvestmentAmount] = useState("");
+    const [botRunning, setBotRunning] = useState(false);
     const [showApiKey, setShowApiKey] = useState(false);
-    const [maxLoss, setMaxLoss] = useState("");
-    const [duration, setDuration] = useState("1h");
 
-    const tradingSettings = {
-        apiKey,
-        investmentAmount,
-        maxLoss,
-        duration,
-    };
+    const [settings, setSettings] = useState({
+        apiKey: "",
+        investmentAmount: "",
+        maxLoss: "",
+        duration: "1h",
+    });
 
     const isFormValid =
-        apiKey.trim() !== "" &&
-        investmentAmount.trim() !== "" &&
-        maxLoss.trim() !== "";
+        settings.apiKey.trim() !== "" &&
+        settings.investmentAmount.trim() !== "" &&
+        settings.maxLoss.trim() !== "";
 
-    const handleToggleBot = () => {
-        if (!isBotRunning && !isFormValid) {
+    const handleStartStop = () => {
+        if (!botRunning && !isFormValid) {
             return;
         }
 
-        setIsBotRunning(!isBotRunning);
+        setBotRunning(!botRunning);
     };
 
     const handleToggleApiKeyVisibility = () => {
         setShowApiKey(!showApiKey);
+    };
+
+    const handleSettingChange = (field, value) => {
+        setSettings((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
     };
 
     return (
@@ -45,16 +48,14 @@ export function TradingDashboard() {
                     <section className="card">
                         <h2>Bot Status</h2>
 
-                        <p>
-                            Status: {isBotRunning ? "Running" : "Stopped"}
-                        </p>
+                        <p>Status: {botRunning ? "Running" : "Stopped"}</p>
 
                         <button
-                            className={isBotRunning ? "btn stop" : "btn start"}
-                            onClick={handleToggleBot}
-                            disabled={!isBotRunning && !isFormValid}
+                            className={botRunning ? "btn stop" : "btn start"}
+                            onClick={handleStartStop}
+                            disabled={!botRunning && !isFormValid}
                         >
-                            {isBotRunning ? "Stop Trading" : "Start Trading"}
+                            {botRunning ? "Stop Trading" : "Start Trading"}
                         </button>
                     </section>
 
@@ -69,12 +70,12 @@ export function TradingDashboard() {
                                     className="form-input"
                                     id="apiKey"
                                     type={showApiKey ? "text" : "password"}
-                                    value={apiKey}
+                                    value={settings.apiKey}
                                     onChange={(event) => {
-                                        setApiKey(event.target.value);
+                                        handleSettingChange("apiKey", event.target.value);
                                     }}
                                     placeholder="Enter your API key"
-                                    disabled={isBotRunning}
+                                    disabled={botRunning}
                                 />
 
                                 <button type="button" onClick={handleToggleApiKeyVisibility}>
@@ -83,7 +84,6 @@ export function TradingDashboard() {
                             </div>
                         </div>
 
-
                         <div className="form-group">
                             <label htmlFor="investment">Investment Amount ($)</label>
                             <input
@@ -91,11 +91,11 @@ export function TradingDashboard() {
                                 id="investment"
                                 type="number"
                                 placeholder="e.g. 5000"
-                                value={investmentAmount}
+                                value={settings.investmentAmount}
                                 onChange={(event) => {
-                                    setInvestmentAmount(event.target.value);
+                                    handleSettingChange("investmentAmount", event.target.value);
                                 }}
-                                disabled={isBotRunning}
+                                disabled={botRunning}
                             />
                         </div>
 
@@ -106,11 +106,11 @@ export function TradingDashboard() {
                                 id="maxLoss"
                                 type="number"
                                 placeholder="e.g. 500"
-                                value={maxLoss}
+                                value={settings.maxLoss}
                                 onChange={(event) => {
-                                    setMaxLoss(event.target.value);
+                                    handleSettingChange("maxLoss", event.target.value);
                                 }}
-                                disabled={isBotRunning}
+                                disabled={botRunning}
                             />
                         </div>
 
@@ -120,11 +120,11 @@ export function TradingDashboard() {
                             <select
                                 className="form-input"
                                 id="duration"
-                                value={duration}
+                                value={settings.duration}
                                 onChange={(event) => {
-                                    setDuration(event.target.value);
+                                    handleSettingChange("duration", event.target.value);
                                 }}
-                                disabled={isBotRunning}
+                                disabled={botRunning}
                             >
                                 <option value="1h">1 Hour</option>
                                 <option value="4h">4 Hours</option>
@@ -132,7 +132,6 @@ export function TradingDashboard() {
                                 <option value="24h">24 Hours</option>
                             </select>
                         </div>
-
                     </section>
 
                     <section className="card">
