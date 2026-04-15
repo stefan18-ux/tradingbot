@@ -5,6 +5,7 @@ export function TradingDashboard() {
     const [botRunning, setBotRunning] = useState(false);
     const [seconds, setSeconds] = useState(0);
     const [showApiKey, setShowApiKey] = useState(false);
+    const [sessionId, setSessionId] = useState(null);
 
     const [settings, setSettings] = useState({
         apiKey: "",
@@ -18,25 +19,79 @@ export function TradingDashboard() {
         settings.investmentAmount.trim() !== "" &&
         settings.maxLoss.trim() !== "";
 
-    useEffect(() => {
-        let timer;
+    // 🔥 IA SESSION DIN BACKEND
+    const fetchSession = async () => {
+        try {
+            const res = await fetch("/api/sessions?user_id=1");
+            const data = await res.json();
 
-        if (botRunning) {
-            timer = setInterval(() => {
-                setSeconds((prev) => prev + 1);
-            }, 1000);
+            if (data.sessions.length > 0) {
+                const session = data.sessions[0];
+
+                setSessionId(session.id);
+
+                if (session.status === "ACTIVE") {
+                    setBotRunning(true);
+
+                    const start = new Date(session.start_timestamp);
+                    const now = new Date();
+
+                    const diff = Math.floor((now - start) / 1000);
+                    setSeconds(diff);
+                } else {
+                    setBotRunning(false);
+                }
+            }
+        } catch (err) {
+            console.error(err);
         }
+    };
 
-        return () => clearInterval(timer);
-    }, [botRunning]);
+    // 🔁 update la 1 sec
+    useEffect(() => {
+        fetchSession();
 
-    const handleStartStop = () => {
-        if (botRunning) {
-            setBotRunning(false);
-            setSeconds(0);
-        } else {
-            if (!isFormValid) return;
-            setBotRunning(true);
+        const interval = setInterval(() => {
+            fetchSession();
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    // ▶️ START / STOP
+    const handleStartStop = async () => {
+        try {
+            if (botRunning) {
+                // STOP
+                await fetch(`/api/sessions/${sessionId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        status: "STOPPED",
+                        stop_timestamp: new Date().toISOString(),
+                    }),
+                });
+            } else {
+                if (!isFormValid) return;
+
+                // START
+                await fetch("/api/sessions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        user_id: 1,
+                        status: "ACTIVE",
+                    }),
+                });
+            }
+
+            fetchSession();
+        } catch (err) {
+            console.error(err);
         }
     };
 
