@@ -29,11 +29,32 @@ export function TradingDashboard() {
         setShowApiKey(!showApiKey);
     };
 
-    const handleSettingChange = (field, value) => {
-        setSettings((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
+    const handleApiKeyChange = (event) => {
+        setSettings({
+            ...settings,
+            apiKey: event.target.value,
+        });
+    };
+
+    const handleInvestmentChange = (event) => {
+        setSettings({
+            ...settings,
+            investmentAmount: event.target.value,
+        });
+    };
+
+    const handleMaxLossChange = (event) => {
+        setSettings({
+            ...settings,
+            maxLoss: event.target.value,
+        });
+    };
+
+    const handleDurationChange = (event) => {
+        setSettings({
+            ...settings,
+            duration: event.target.value,
+        });
     };
 
     return (
@@ -71,9 +92,7 @@ export function TradingDashboard() {
                                     id="apiKey"
                                     type={showApiKey ? "text" : "password"}
                                     value={settings.apiKey}
-                                    onChange={(event) => {
-                                        handleSettingChange("apiKey", event.target.value);
-                                    }}
+                                    onChange={handleApiKeyChange}
                                     placeholder="Enter your API key"
                                     disabled={botRunning}
                                 />
@@ -92,9 +111,7 @@ export function TradingDashboard() {
                                 type="number"
                                 placeholder="e.g. 5000"
                                 value={settings.investmentAmount}
-                                onChange={(event) => {
-                                    handleSettingChange("investmentAmount", event.target.value);
-                                }}
+                                onChange={handleInvestmentChange}
                                 disabled={botRunning}
                             />
                         </div>
@@ -107,9 +124,7 @@ export function TradingDashboard() {
                                 type="number"
                                 placeholder="e.g. 500"
                                 value={settings.maxLoss}
-                                onChange={(event) => {
-                                    handleSettingChange("maxLoss", event.target.value);
-                                }}
+                                onChange={handleMaxLossChange}
                                 disabled={botRunning}
                             />
                         </div>
@@ -121,9 +136,7 @@ export function TradingDashboard() {
                                 className="form-input"
                                 id="duration"
                                 value={settings.duration}
-                                onChange={(event) => {
-                                    handleSettingChange("duration", event.target.value);
-                                }}
+                                onChange={handleDurationChange}
                                 disabled={botRunning}
                             >
                                 <option value="1h">1 Hour</option>
