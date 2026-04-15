@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { Play, Square, AlertCircle, Lock } from "lucide-react";
 
-
-
 export function TradingDashboard() {
     const [botRunning, setBotRunning] = useState(false);
     const [seconds, setSeconds] = useState(0);
     const [showApiKey, setShowApiKey] = useState(false);
     const [sessionId, setSessionId] = useState(null);
+    const [wallet, setWallet] = useState("");
 
     const [settings, setSettings] = useState({
         apiKey: "",
@@ -29,18 +28,18 @@ export function TradingDashboard() {
             if (data.sessions.length > 0) {
                 const session = data.sessions[0];
 
-                setSessionId(session.id);
-
                 if (session.status === "ACTIVE") {
+                    setSessionId(session.id);
                     setBotRunning(true);
 
-                    const start = new Date(session.start_timestamp.endsWith("Z") 
-                        ? session.start_timestamp 
-                        : session.start_timestamp + "Z"
+                    const start = new Date(
+                        session.start_timestamp.endsWith("Z")
+                            ? session.start_timestamp
+                            : session.start_timestamp + "Z"
                     );
                     const now = new Date();
                     const diff = Math.floor((now - start) / 1000);
-                    
+
                     setSeconds(diff);
                 } else {
                     setBotRunning(false);
@@ -65,8 +64,9 @@ export function TradingDashboard() {
             setSettings((prev) => ({
                 ...prev,
                 apiKey: data.api_key || "",
-                investmentAmount: data.wallet ? String(data.wallet) : "",
             }));
+
+            setWallet(data.wallet ? String(data.wallet) : "");
         } catch (err) {
             console.error("Error fetching user settings:", err);
         }
@@ -78,12 +78,11 @@ export function TradingDashboard() {
 
         const interval = setInterval(() => {
             fetchSession();
+            fetchUserSettings();
         }, 1000);
 
         return () => clearInterval(interval);
     }, []);
-
-
 
     const handleStartStop = async () => {
         try {
@@ -114,6 +113,7 @@ export function TradingDashboard() {
             }
 
             fetchSession();
+            fetchUserSettings();
         } catch (err) {
             console.error(err);
         }
@@ -134,7 +134,6 @@ export function TradingDashboard() {
         <div className="min-h-screen bg-gray-100 p-6">
             <div className="max-w-5xl mx-auto space-y-6">
 
-                {/* HEADER */}
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">
                         Trading Dashboard
@@ -144,18 +143,19 @@ export function TradingDashboard() {
                     </p>
                 </div>
 
-                {/* BOT STATUS */}
                 <div className="bg-white p-6 rounded-xl shadow border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold text-gray-900">
                             Bot Status
                         </h2>
 
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                            botRunning
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-700"
-                        }`}>
+                        <span
+                            className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                botRunning
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-gray-100 text-gray-700"
+                            }`}
+                        >
                             {botRunning ? "Running" : "Stopped"}
                         </span>
                     </div>
@@ -166,6 +166,15 @@ export function TradingDashboard() {
                             <span>
                                 Trading settings must be completed before starting trading.
                             </span>
+                        </div>
+                    )}
+
+                    {botRunning && (
+                        <div className="mb-4">
+                            <p className="text-sm text-gray-500">Wallet</p>
+                            <p className="text-2xl font-bold text-gray-900">
+                                ${wallet || "0.00"}
+                            </p>
                         </div>
                     )}
 
@@ -194,7 +203,6 @@ export function TradingDashboard() {
                     </button>
                 </div>
 
-                {/* SETTINGS */}
                 <div className="bg-white p-6 rounded-xl shadow border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold text-gray-900">
@@ -289,7 +297,6 @@ export function TradingDashboard() {
                     </div>
                 </div>
 
-                {/* SESSION */}
                 <div className="bg-white p-6 rounded-xl shadow border border-gray-200">
                     <h2 className="text-xl font-semibold text-gray-900 mb-2">
                         Current Session {botRunning ? "(Active)" : ""}
