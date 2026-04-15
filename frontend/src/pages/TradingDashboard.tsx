@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Play, Square, AlertCircle, Lock } from "lucide-react";
 
+
+
 export function TradingDashboard() {
     const [botRunning, setBotRunning] = useState(false);
     const [seconds, setSeconds] = useState(0);
@@ -19,10 +21,9 @@ export function TradingDashboard() {
         settings.investmentAmount.trim() !== "" &&
         settings.maxLoss.trim() !== "";
 
-    // 🔥 IA SESSION DIN BACKEND
     const fetchSession = async () => {
         try {
-            const res = await fetch("/api/sessions?user_id=1");
+            const res = await fetch("http://localhost:5000/api/sessions?user_id=1");
             const data = await res.json();
 
             if (data.sessions.length > 0) {
@@ -33,23 +34,47 @@ export function TradingDashboard() {
                 if (session.status === "ACTIVE") {
                     setBotRunning(true);
 
-                    const start = new Date(session.start_timestamp);
+                    const start = new Date(session.start_timestamp.endsWith("Z") 
+                        ? session.start_timestamp 
+                        : session.start_timestamp + "Z"
+                    );
                     const now = new Date();
-
                     const diff = Math.floor((now - start) / 1000);
+                    
                     setSeconds(diff);
                 } else {
                     setBotRunning(false);
+                    setSeconds(0);
+                    setSessionId(null);
                 }
+            } else {
+                setBotRunning(false);
+                setSeconds(0);
+                setSessionId(null);
             }
         } catch (err) {
-            console.error(err);
+            console.error("Error fetching session:", err);
         }
     };
 
-    // 🔁 update la 1 sec
+    const fetchUserSettings = async () => {
+        try {
+            const res = await fetch("http://localhost:5000/api/users/1");
+            const data = await res.json();
+
+            setSettings((prev) => ({
+                ...prev,
+                apiKey: data.api_key || "",
+                investmentAmount: data.wallet ? String(data.wallet) : "",
+            }));
+        } catch (err) {
+            console.error("Error fetching user settings:", err);
+        }
+    };
+
     useEffect(() => {
         fetchSession();
+        fetchUserSettings();
 
         const interval = setInterval(() => {
             fetchSession();
@@ -58,12 +83,12 @@ export function TradingDashboard() {
         return () => clearInterval(interval);
     }, []);
 
-    // ▶️ START / STOP
+
+
     const handleStartStop = async () => {
         try {
-            if (botRunning) {
-                // STOP
-                await fetch(`/api/sessions/${sessionId}`, {
+            if (botRunning && sessionId) {
+                await fetch(`http://localhost:5000/api/sessions/${sessionId}`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
@@ -76,8 +101,7 @@ export function TradingDashboard() {
             } else {
                 if (!isFormValid) return;
 
-                // START
-                await fetch("/api/sessions", {
+                await fetch("http://localhost:5000/api/sessions", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
