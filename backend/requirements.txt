@@ -4,3 +4,4 @@ PyMySQL
 Flask-Migrate
 python-dotenv
 cryptography
+flask-cors
