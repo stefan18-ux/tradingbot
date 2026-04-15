@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
-from backend.database.models import db, User, UserRole
+from database.models import db, User, UserRole
+from utils.encryption import encrypt_secret
+import os
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from decimal import Decimal
@@ -50,10 +52,11 @@ def create_user():
             except KeyError:
                 return jsonify({'error': 'Invalid role. Must be USER or ADMIN'}), 400
         
+        alpaca_secret_raw = data.get('alpaca_secret')
         user = User(
             firebase_uid=data['firebase_uid'],
             api_key=data.get('api_key'),
-            alpaca_secret=data.get('alpaca_secret'),
+            alpaca_secret=encrypt_secret(alpaca_secret_raw) if alpaca_secret_raw is not None else None,
             wallet=wallet_value,
             role=role_value if 'role' in data else UserRole.USER
         )
@@ -131,6 +134,21 @@ def get_user_by_firebase(firebase_uid):
         return jsonify({'error': 'An error occurred: ' + str(e)}), 500
 
 
+@users_bp.route('/<int:user_id>/secret', methods=['GET'])
+def get_user_with_secret(user_id):
+    """Get a specific user by ID and include the Alpaca secret in response (encrypted)"""
+    try:
+        user = User.query.get(user_id)
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        return jsonify(format_user_response(user, True)), 200
+        
+    except Exception as e:
+        return jsonify({'error': 'An error occurred: ' + str(e)}), 500
+
+
 @users_bp.route('/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
     """Update a specific user"""
@@ -149,7 +167,8 @@ def update_user(user_id):
             user.api_key = data['api_key']
         
         if 'alpaca_secret' in data:
-            user.alpaca_secret = data['alpaca_secret']
+            alpaca_secret_raw = data.get('alpaca_secret')
+            user.alpaca_secret = encrypt_secret(alpaca_secret_raw) if alpaca_secret_raw is not None else None
         
         if 'wallet' in data:
             wallet_value = Decimal(str(data['wallet']))
