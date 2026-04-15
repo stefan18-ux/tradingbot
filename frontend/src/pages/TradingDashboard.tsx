@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Play, Square, AlertCircle } from "lucide-react";  
 import "./TradingDashboard.css";
 
 export function TradingDashboard() {
@@ -100,8 +101,9 @@ export function TradingDashboard() {
 
                     {/* BOT STATUS */}
                     <section className="card">
-                        <div className="status-row">
-                            <span>Status</span>
+                        <div className="status-header">
+                            <h2>Bot Status</h2>
+
                             <span className={botRunning ? "status running" : "status stopped"}>
                                 {botRunning ? "Running" : "Stopped"}
                             </span>
@@ -109,7 +111,8 @@ export function TradingDashboard() {
 
                         {!isFormValid && !botRunning && (
                             <div className="warning">
-                                Please complete all fields before starting trading
+                                <AlertCircle size={18} />
+                                <span>Trading settings must be completed before starting trading.</span>
                             </div>
                         )}
 
@@ -118,7 +121,17 @@ export function TradingDashboard() {
                             onClick={handleStartStop}
                             disabled={!botRunning && !isFormValid}
                         >
-                            {botRunning ? "Stop Trading" : "Start Trading"}
+                            {botRunning ? (
+                                <>
+                                    <Square size={18} />
+                                    Stop Trading
+                                </>
+                            ) : (
+                                <>
+                                    <Play size={18} />
+                                    Start Trading
+                                </>
+                            )}
                         </button>
                     </section>
 
