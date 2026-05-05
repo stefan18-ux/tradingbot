@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   ChevronDown,
   Shield,
@@ -9,9 +9,27 @@ import {
   Zap,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 export function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const { loginWithGoogle, currentUser } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleGoogleLogin() {
+    try {
+      if (currentUser) {
+        navigate("/dashboard");
+        return;
+      }
+      await loginWithGoogle();
+      navigate("/dashboard");
+    } catch (err: any) {
+      if (err?.code !== "auth/popup-closed-by-user") {
+        console.error("Google login error:", err);
+      }
+    }
+  }
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -70,8 +88,10 @@ export function LandingPage() {
             with advanced risk management, 24/7 monitoring, and proven
             strategies.
           </p>
-          <button className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold shadow-lg hover:shadow-xl transition flex items-center mx-auto gap-2">
-            <svg className="w-6 h-6" viewBox="0 0 24 24">
+          <button
+            onClick={handleGoogleLogin}
+            className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold shadow-lg hover:shadow-xl transition flex items-center mx-auto gap-2"
+          >            <svg className="w-6 h-6" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

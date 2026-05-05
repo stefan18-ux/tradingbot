@@ -6,13 +6,32 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 export function DashboardLayout() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const { currentUser, logout } = useAuth();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logout();
     navigate("/");
+  };
+
+  // Get initials from user display name or email
+  const getInitials = () => {
+    if (currentUser?.displayName) {
+      return currentUser.displayName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    if (currentUser?.email) {
+      return currentUser.email[0].toUpperCase();
+    }
+    return "?";
   };
 
   return (
@@ -48,9 +67,18 @@ export function DashboardLayout() {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-2 hover:bg-gray-100 px-3 py-2 rounded-lg transition"
               >
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                  JD
-                </div>
+                {currentUser?.photoURL ? (
+                  <img
+                    src={currentUser.photoURL}
+                    alt="Avatar"
+                    className="w-8 h-8 rounded-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                    {getInitials()}
+                  </div>
+                )}
                 <ChevronDown className="h-4 w-4 text-gray-600" />
               </button>
 
