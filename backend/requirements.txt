@@ -5,3 +5,4 @@ Flask-Migrate
 python-dotenv
 cryptography
 flask-cors
+firebase-admin

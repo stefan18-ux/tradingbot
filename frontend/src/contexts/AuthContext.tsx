@@ -12,11 +12,11 @@ import {
   type User,
 } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+import { apiFetch } from "../lib/api";
 
 interface AuthContextType {
   currentUser: User | null;
+  dbUserId: number | null;
   loading: boolean;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
@@ -32,23 +32,39 @@ export function useAuth() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [dbUserId, setDbUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Ensure user exists in backend after Firebase auth
   async function ensureBackendUser(user: User) {
     try {
+      // Get the Firebase ID token (JWT) to send to backend
+      const idToken = await user.getIdToken();
+
       // Check if user already exists
       const checkRes = await fetch(
-        `${API_BASE}/api/users/firebase/${user.uid}`
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/api/users/firebase/${user.uid}`
       );
+
       if (checkRes.status === 404) {
-        // Create user in backend
-        await fetch(`${API_BASE}/api/users`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ firebase_uid: user.uid }),
-        });
+        // Create user in backend (this endpoint doesn't require auth)
+        const createRes = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/api/users`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ firebase_uid: user.uid }),
+          }
+        );
+        const createdUser = await createRes.json();
+        setDbUserId(createdUser.id);
+      } else {
+        const existingUser = await checkRes.json();
+        setDbUserId(existingUser.id);
       }
+
+      // Store the token so it's accessible for debugging if needed
+      console.log("[AUTH] Firebase JWT obtained, length:", idToken.length);
     } catch (err) {
       console.error("Failed to sync user with backend:", err);
     }
@@ -61,10 +77,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function logout() {
     await signOut(auth);
+    setDbUserId(null);
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await ensureBackendUser(user);
+      } else {
+        setDbUserId(null);
+      }
       setCurrentUser(user);
       setLoading(false);
     });
@@ -72,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ currentUser, loading, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ currentUser, dbUserId, loading, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );

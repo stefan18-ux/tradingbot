@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Play, Square, AlertCircle, Lock } from "lucide-react";
+import { apiFetch } from "../lib/api";
+import { useAuth } from "../contexts/AuthContext";
 
 export function TradingDashboard() {
     const [botRunning, setBotRunning] = useState(false);
@@ -7,6 +9,7 @@ export function TradingDashboard() {
     const [showApiKey, setShowApiKey] = useState(false);
     const [sessionId, setSessionId] = useState(null);
     const [wallet, setWallet] = useState("");
+    const { dbUserId } = useAuth();
 
     const [settings, setSettings] = useState({
         apiKey: "",
@@ -21,8 +24,9 @@ export function TradingDashboard() {
         settings.maxLoss.trim() !== "";
 
     const fetchSession = async () => {
+        if (!dbUserId) return;
         try {
-            const res = await fetch("http://localhost:5000/api/sessions?user_id=1");
+            const res = await apiFetch(`/api/sessions?user_id=${dbUserId}`);
             const data = await res.json();
 
             if (data.sessions.length > 0) {
@@ -57,8 +61,9 @@ export function TradingDashboard() {
     };
 
     const fetchUserSettings = async () => {
+        if (!dbUserId) return;
         try {
-            const res = await fetch("http://localhost:5000/api/users/1");
+            const res = await apiFetch(`/api/users/${dbUserId}`);
             const data = await res.json();
 
             setSettings((prev) => ({
@@ -82,12 +87,12 @@ export function TradingDashboard() {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [dbUserId]);
 
     const handleStartStop = async () => {
         try {
             if (botRunning && sessionId) {
-                await fetch(`http://localhost:5000/api/sessions/${sessionId}`, {
+                await apiFetch(`/api/sessions/${sessionId}`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
@@ -98,15 +103,15 @@ export function TradingDashboard() {
                     }),
                 });
             } else {
-                if (!isFormValid) return;
+                if (!isFormValid || !dbUserId) return;
 
-                await fetch("http://localhost:5000/api/sessions", {
+                await apiFetch("/api/sessions", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        user_id: 1,
+                        user_id: dbUserId,
                         status: "ACTIVE",
                     }),
                 });

@@ -1,5 +1,6 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from database.models import db, Session, User, SessionStatus
+from utils.auth import firebase_auth_required
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from decimal import Decimal
@@ -20,6 +21,7 @@ def format_session_response(session):
 
 
 @sessions_bp.route('', methods=['POST'])
+@firebase_auth_required
 def create_session():
     """Create a new session"""
     try:
@@ -66,6 +68,7 @@ def create_session():
 
 
 @sessions_bp.route('', methods=['GET'])
+@firebase_auth_required
 def get_all_sessions():
     """Get all sessions with optional filters"""
     try:
@@ -106,6 +109,7 @@ def get_all_sessions():
 
 
 @sessions_bp.route('/<int:session_id>', methods=['GET'])
+@firebase_auth_required
 def get_session(session_id):
     """Get a specific session by ID"""
     try:
@@ -121,6 +125,7 @@ def get_session(session_id):
 
 
 @sessions_bp.route('/user/<int:user_id>', methods=['GET'])
+@firebase_auth_required
 def get_sessions_by_user(user_id):
     """Get all sessions for a specific user"""
     try:
@@ -151,6 +156,7 @@ def get_sessions_by_user(user_id):
 
 
 @sessions_bp.route('/<int:session_id>', methods=['PUT'])
+@firebase_auth_required
 def update_session(session_id):
     """Update a specific session"""
     try:
@@ -200,6 +206,7 @@ def update_session(session_id):
 
 
 @sessions_bp.route('/<int:session_id>', methods=['DELETE'])
+@firebase_auth_required
 def delete_session(session_id):
     """Delete a specific session"""
     try:

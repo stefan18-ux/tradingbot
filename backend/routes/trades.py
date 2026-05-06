@@ -1,5 +1,6 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from database.models import db, Trade, Session, TradeType
+from utils.auth import firebase_auth_required
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from decimal import Decimal
@@ -20,6 +21,7 @@ def format_trade_response(trade):
 
 
 @trades_bp.route('', methods=['POST'])
+@firebase_auth_required
 def create_trade():
     """Create a new trade"""
     try:
@@ -70,6 +72,7 @@ def create_trade():
 
 
 @trades_bp.route('', methods=['GET'])
+@firebase_auth_required
 def get_all_trades():
     """Get all trades with optional filters"""
     try:
@@ -112,6 +115,7 @@ def get_all_trades():
 
 
 @trades_bp.route('/<int:trade_id>', methods=['GET'])
+@firebase_auth_required
 def get_trade(trade_id):
     """Get a specific trade by ID"""
     try:
@@ -127,6 +131,7 @@ def get_trade(trade_id):
 
 
 @trades_bp.route('/session/<int:session_id>', methods=['GET'])
+@firebase_auth_required
 def get_trades_by_session(session_id):
     """Get all trades for a specific session"""
     try:
@@ -157,6 +162,7 @@ def get_trades_by_session(session_id):
 
 
 @trades_bp.route('/<int:trade_id>', methods=['PUT'])
+@firebase_auth_required
 def update_trade(trade_id):
     """Update a specific trade"""
     try:
@@ -214,6 +220,7 @@ def update_trade(trade_id):
 
 
 @trades_bp.route('/<int:trade_id>', methods=['DELETE'])
+@firebase_auth_required
 def delete_trade(trade_id):
     """Delete a specific trade"""
     try:
