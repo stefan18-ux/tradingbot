@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, g
 from database.models import db, Trade, Session, TradeType
-from utils.auth import firebase_auth_required
+from utils.auth import firebase_auth_required, admin_only
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from decimal import Decimal
@@ -220,7 +220,7 @@ def update_trade(trade_id):
 
 
 @trades_bp.route('/<int:trade_id>', methods=['DELETE'])
-@firebase_auth_required
+@admin_only
 def delete_trade(trade_id):
     """Delete a specific trade"""
     try:

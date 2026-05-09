@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, g
 from database.models import db, Session, User, SessionStatus
-from utils.auth import firebase_auth_required
+from utils.auth import firebase_auth_required, admin_only
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from decimal import Decimal
@@ -206,7 +206,7 @@ def update_session(session_id):
 
 
 @sessions_bp.route('/<int:session_id>', methods=['DELETE'])
-@firebase_auth_required
+@admin_only
 def delete_session(session_id):
     """Delete a specific session"""
     try:

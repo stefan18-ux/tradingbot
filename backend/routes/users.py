@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, g
 from database.models import db, User, UserRole
 from utils.encryption import encrypt_secret
-from utils.auth import firebase_auth_required
+from utils.auth import firebase_auth_required, admin_only
 import os
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
@@ -86,7 +86,7 @@ def create_user():
 
 
 @users_bp.route('', methods=['GET'])
-@firebase_auth_required
+@admin_only
 def get_all_users():
     """Get all users"""
     try:
@@ -138,7 +138,7 @@ def get_user_by_firebase(firebase_uid):
 
 
 @users_bp.route('/<int:user_id>/secret', methods=['GET'])
-@firebase_auth_required
+@admin_only
 def get_user_with_secret(user_id):
     """Get a specific user by ID and include the Alpaca secret in response (encrypted)"""
     try:
@@ -203,7 +203,7 @@ def update_user(user_id):
 
 
 @users_bp.route('/<int:user_id>', methods=['DELETE'])
-@firebase_auth_required
+@admin_only
 def delete_user(user_id):
     """Delete a specific user"""
     try:

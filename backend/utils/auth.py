@@ -2,7 +2,10 @@
 Firebase JWT authentication middleware for Flask.
 
 Verifies Firebase ID tokens sent as Bearer tokens in the Authorization header.
-Provides a decorator `firebase_auth_required` to protect routes.
+Provides decorators to protect routes:
+  - `firebase_auth_required` — verifies a valid Firebase ID token.
+  - `admin_required`         — stacks after firebase_auth_required; enforces ADMIN role.
+  - `admin_only`             — combined single decorator (auth + admin role check).
 """
 
 import os
@@ -82,5 +85,66 @@ def firebase_auth_required(f):
         print(f"[AUTH SUCCESS] User {g.firebase_uid} authenticated for {request.path}")
 
         return f(*args, **kwargs)
+
+    return decorated_function
+
+
+def admin_required(f):
+    """
+    Decorator that enforces ADMIN role on a Flask route.
+
+    Must be applied AFTER (i.e. inside) `firebase_auth_required`, so that
+    `g.firebase_uid` is already populated when this decorator runs.
+
+    On success, sets:
+        g.db_user — the SQLAlchemy User record for the authenticated user
+
+    Returns 401 if the user is not found in the database.
+    Returns 403 if the user exists but does not have the ADMIN role.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Import here to avoid circular imports (models -> db -> app)
+        from database.models import User, UserRole
+
+        firebase_uid = getattr(g, 'firebase_uid', None)
+        if not firebase_uid:
+            return jsonify({'error': 'Authentication required'}), 401
+
+        db_user = User.query.filter_by(firebase_uid=firebase_uid).first()
+        if not db_user:
+            return jsonify({'error': 'User not found in database'}), 401
+
+        if db_user.role != UserRole.ADMIN:
+            print(f"[AUTH FORBIDDEN] User {firebase_uid} (role={db_user.role.value}) "
+                  f"attempted to access admin route {request.path}")
+            return jsonify({'error': 'Admin access required'}), 403
+
+        g.db_user = db_user
+        print(f"[ADMIN ACCESS] User {firebase_uid} granted access to {request.path}")
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+def admin_only(f):
+    """
+    Convenience decorator that combines Firebase authentication and ADMIN role
+    enforcement into a single decorator.
+
+    Equivalent to stacking:
+        @firebase_auth_required
+        @admin_required
+
+    On success, sets:
+        g.firebase_uid  — the user's Firebase UID
+        g.firebase_user — the full decoded token claims
+        g.db_user       — the SQLAlchemy User record
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Re-use the existing decorators in the correct order
+        return firebase_auth_required(admin_required(f))(*args, **kwargs)
 
     return decorated_function
