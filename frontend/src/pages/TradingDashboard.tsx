@@ -60,16 +60,18 @@ export function TradingDashboard() {
         }
     };
 
-    const fetchUserSettings = async () => {
+    const fetchUserSettings = async (isInitial = false) => {
         if (!dbUserId) return;
         try {
             const res = await apiFetch(`/api/users/${dbUserId}`);
             const data = await res.json();
 
-            setSettings((prev) => ({
-                ...prev,
-                apiKey: data.api_key || "",
-            }));
+            if (isInitial) {
+                setSettings((prev) => ({
+                    ...prev,
+                    apiKey: data.api_key || "",
+                }));
+            }
 
             setWallet(data.wallet ? String(data.wallet) : "");
         } catch (err) {
@@ -79,11 +81,11 @@ export function TradingDashboard() {
 
     useEffect(() => {
         fetchSession();
-        fetchUserSettings();
+        fetchUserSettings(true);
 
         const interval = setInterval(() => {
             fetchSession();
-            fetchUserSettings();
+            fetchUserSettings(false);
         }, 1000);
 
         return () => clearInterval(interval);
