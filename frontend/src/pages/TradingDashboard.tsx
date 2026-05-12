@@ -1,3 +1,4 @@
+// If you use useNavigate, import it from react-router-dom
 import { useEffect, useState } from "react";
 import { Play, Square, AlertCircle, Lock } from "lucide-react";
 import { apiFetch } from "../lib/api";

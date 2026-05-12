@@ -1,5 +1,5 @@
 import { useAuth } from "../contexts/AuthContext";
-import { Navigate } from "react-router";
+import { Navigate } from "react-router-dom";
 import { TrendingUp } from "lucide-react";
 import { useState } from "react";
 
