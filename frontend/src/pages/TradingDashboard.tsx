@@ -73,7 +73,12 @@ export function TradingDashboard() {
                 }));
             }
 
-            setWallet(data.wallet ? String(data.wallet) : "");
+            if (data.wallet !== undefined && data.wallet !== null) {
+                const num = Number(data.wallet);
+                setWallet(!isNaN(num) ? num.toFixed(4) : "");
+            } else {
+                setWallet("");
+            }
         } catch (err) {
             console.error("Error fetching user settings:", err);
         }
