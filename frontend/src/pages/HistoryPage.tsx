@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -162,6 +162,35 @@ const sessions: Session[] = [
 
 export function HistoryPage() {
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>("1");
+  const [currentSessionTime, setCurrentSessionTime] = useState(7845);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setCurrentSessionTime((previousTime) => previousTime + 1);
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
+
+  const formatDuration = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
+
+  const getSessionDuration = (session: Session) => {
+    if (session.isCurrent) {
+      return formatDuration(currentSessionTime);
+    }
+
+    return session.duration;
+  };
 
   const toggleSession = (sessionId: string) => {
     setExpandedSessionId((currentId) =>
@@ -185,11 +214,11 @@ export function HistoryPage() {
                 session.isCurrent ? "bg-blue-50" : ""
               }`}
             >
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <h2 className="text-xl font-semibold text-gray-900">
                     {session.isCurrent
-                      ? `Current Session — ${session.duration}`
+                      ? `Current Session — ${getSessionDuration(session)}`
                       : session.date}
                   </h2>
 
@@ -201,9 +230,9 @@ export function HistoryPage() {
                 </div>
 
                 {expandedSessionId === session.id ? (
-                  <ChevronUp className="h-6 w-6 text-gray-500" />
+                  <ChevronUp className="h-6 w-6 shrink-0 text-gray-500" />
                 ) : (
-                  <ChevronDown className="h-6 w-6 text-gray-500" />
+                  <ChevronDown className="h-6 w-6 shrink-0 text-gray-500" />
                 )}
               </div>
 
@@ -211,7 +240,7 @@ export function HistoryPage() {
                 <div>
                   <p className="mb-1 text-sm text-gray-600">Duration</p>
                   <p className="text-lg font-semibold text-gray-900">
-                    {session.duration}
+                    {getSessionDuration(session)}
                   </p>
                 </div>
 
