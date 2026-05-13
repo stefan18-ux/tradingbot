@@ -1,4 +1,10 @@
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { useState } from "react";
+import {
+  ChevronDown,
+  ChevronUp,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 
 interface Session {
   id: string;
@@ -39,6 +45,14 @@ const sessions: Session[] = [
 ];
 
 export function HistoryPage() {
+  const [expandedSessionId, setExpandedSessionId] = useState<string | null>("1");
+
+  const toggleSession = (sessionId: string) => {
+    setExpandedSessionId((currentId) =>
+      currentId === sessionId ? null : sessionId
+    );
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Trading History</h1>
@@ -47,64 +61,86 @@ export function HistoryPage() {
         {sessions.map((session) => (
           <div
             key={session.id}
-            className={`rounded-xl border border-gray-200 bg-white p-6 shadow-sm ${
-              session.isCurrent ? "bg-blue-50" : ""
-            }`}
+            className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
           >
-            <div className="mb-4 flex items-center gap-3">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {session.isCurrent
-                  ? `Current Session — ${session.duration}`
-                  : session.date}
-              </h2>
+            <div
+              onClick={() => toggleSession(session.id)}
+              className={`cursor-pointer p-6 transition hover:bg-gray-50 ${
+                session.isCurrent ? "bg-blue-50" : ""
+              }`}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {session.isCurrent
+                      ? `Current Session — ${session.duration}`
+                      : session.date}
+                  </h2>
 
-              {session.isCurrent && (
-                <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
-                  Active
-                </span>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              <div>
-                <p className="mb-1 text-sm text-gray-600">Duration</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {session.duration}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-1 text-sm text-gray-600">Total Profit</p>
-                <p className="text-lg font-semibold text-green-600">
-                  ${session.totalProfit.toFixed(2)}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-1 text-sm text-gray-600">Total Loss</p>
-                <p className="text-lg font-semibold text-red-600">
-                  ${session.totalLoss.toFixed(2)}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-1 text-sm text-gray-600">Net Profit/Loss</p>
-                <div
-                  className={`flex items-center gap-1 text-lg font-bold ${
-                    session.netProfitLoss >= 0
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {session.netProfitLoss >= 0 ? (
-                    <TrendingUp className="h-5 w-5" />
-                  ) : (
-                    <TrendingDown className="h-5 w-5" />
+                  {session.isCurrent && (
+                    <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
+                      Active
+                    </span>
                   )}
-                  ${Math.abs(session.netProfitLoss).toFixed(2)}
+                </div>
+
+                {expandedSessionId === session.id ? (
+                  <ChevronUp className="h-6 w-6 text-gray-500" />
+                ) : (
+                  <ChevronDown className="h-6 w-6 text-gray-500" />
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                <div>
+                  <p className="mb-1 text-sm text-gray-600">Duration</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {session.duration}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="mb-1 text-sm text-gray-600">Total Profit</p>
+                  <p className="text-lg font-semibold text-green-600">
+                    ${session.totalProfit.toFixed(2)}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="mb-1 text-sm text-gray-600">Total Loss</p>
+                  <p className="text-lg font-semibold text-red-600">
+                    ${session.totalLoss.toFixed(2)}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="mb-1 text-sm text-gray-600">Net Profit/Loss</p>
+                  <div
+                    className={`flex items-center gap-1 text-lg font-bold ${
+                      session.netProfitLoss >= 0
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {session.netProfitLoss >= 0 ? (
+                      <TrendingUp className="h-5 w-5" />
+                    ) : (
+                      <TrendingDown className="h-5 w-5" />
+                    )}
+                    ${Math.abs(session.netProfitLoss).toFixed(2)}
+                  </div>
                 </div>
               </div>
             </div>
+
+            {expandedSessionId === session.id && (
+              <div className="border-t border-gray-200 bg-gray-50 p-6">
+                <h3 className="text-lg font-semibold text-gray-900">Trades</h3>
+                <p className="mt-2 text-sm text-gray-600">
+                  Trades table will be added in the next step.
+                </p>
+              </div>
+            )}
           </div>
         ))}
       </div>
