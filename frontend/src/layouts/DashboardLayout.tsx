@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   LogOut,
   ChevronDown,
+  Settings,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
@@ -83,7 +84,16 @@ export function DashboardLayout() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <Link
+                    to="/account"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition w-full text-left"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    <Settings className="h-4 w-4" />
+                    Account Settings
+                  </Link>
+                  <hr className="my-1 border-gray-200" />
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition w-full text-left"

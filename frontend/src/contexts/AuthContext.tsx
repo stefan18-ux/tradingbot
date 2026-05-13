@@ -12,8 +12,6 @@ import {
   type User,
 } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
-import { apiFetch } from "../lib/api";
-
 interface AuthContextType {
   currentUser: User | null;
   dbUserId: number | null;

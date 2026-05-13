@@ -5,6 +5,7 @@ import { TradingDashboard } from "./pages/TradingDashboard";
 import { DashboardLayout } from "./layouts/DashboardLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminDashboard } from "./pages/AdminDashboard";
+import { AccountSettings } from "./pages/AccountSettings";
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +31,20 @@ export const router = createBrowserRouter([
       {
         path: "admin/*",
         Component: AdminDashboard,
+      },
+    ],
+  },
+  {
+    path: "/account",
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        Component: AccountSettings,
       },
     ],
   },

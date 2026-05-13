@@ -43,7 +43,7 @@ export function TradingDashboard() {
                             : session.start_timestamp + "Z"
                     );
                     const now = new Date();
-                    const diff = Math.floor((now - start) / 1000);
+                    const diff = Math.floor((now.getTime() - start.getTime()) / 1000);
 
                     setSeconds(diff);
                 } else {
@@ -132,7 +132,7 @@ export function TradingDashboard() {
         }
     };
 
-    const handleChange = (field, value) => {
+    const handleChange = (field: string, value: any) => {
         setSettings({ ...settings, [field]: value });
     };
 
