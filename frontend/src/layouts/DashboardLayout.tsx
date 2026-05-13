@@ -5,6 +5,7 @@ import {
   LogOut,
   ChevronDown,
   Settings,
+  History,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
@@ -58,6 +59,14 @@ export function DashboardLayout() {
                 >
                   <LayoutDashboard className="h-5 w-5" />
                   Dashboard
+                </Link>
+
+                <Link
+                  to="/dashboard/history"
+                  className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition"
+                >
+                  <History className="h-5 w-5" />
+                  History
                 </Link>
               </div>
             </div>

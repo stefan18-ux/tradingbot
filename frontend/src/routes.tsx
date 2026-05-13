@@ -6,6 +6,7 @@ import { DashboardLayout } from "./layouts/DashboardLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { AccountSettings } from "./pages/AccountSettings";
+import { HistoryPage } from "./pages/HistoryPage";
 
 export const router = createBrowserRouter([
   {
@@ -31,6 +32,10 @@ export const router = createBrowserRouter([
       {
         path: "admin/*",
         Component: AdminDashboard,
+      },
+      {
+        path: "history",
+        element: <HistoryPage />,
       },
     ],
   },
