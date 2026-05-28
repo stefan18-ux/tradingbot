@@ -16,6 +16,9 @@ node_modules
 dist
 dist-ssr
 *.local
+model-dev/training/checkpoints/
+model-dev/training/*candidate*/
+model-dev/training/best_qqq_model_active*/
 
 # Editor directories and files
 .vscode/*

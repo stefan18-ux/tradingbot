@@ -54,10 +54,6 @@ export function AccountSettings() {
     loadBackendData();
   }, [dbUserId]);
 
-  const handleProfileChange = (field: string, value: string) => {
-    setProfile({ ...profile, [field]: value });
-  };
-
   const handleSecurityChange = (field: string, value: string) => {
     setSecurity({ ...security, [field]: value });
   };

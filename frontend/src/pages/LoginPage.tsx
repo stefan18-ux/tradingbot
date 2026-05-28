@@ -32,7 +32,11 @@ export function LoginPage() {
         setIsSigningIn(false);
         return;
       }
-      setError("Autentificarea a eșuat. Încearcă din nou.");
+      setError(
+        err?.code
+          ? `Autentificarea a eșuat: ${err.code}`
+          : "Autentificarea a eșuat. Încearcă din nou."
+      );
       console.error("Google login error:", err);
     } finally {
       setIsSigningIn(false);

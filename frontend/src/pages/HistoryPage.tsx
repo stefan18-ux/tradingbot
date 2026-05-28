@@ -5,7 +5,7 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import { apiFetch } from "../lib/api";
+import { apiFetch, fetchSessionPerformance, type SessionPerformanceResponse } from "../lib/api";
 import { useAuth } from "../contexts/AuthContext";
 
 interface Trade {
@@ -14,6 +14,7 @@ interface Trade {
   action: "Buy" | "Sell";
   amount: number;
   price: number;
+  notional: number;
 }
 
 interface Session {
@@ -23,6 +24,21 @@ interface Session {
   totalProfit: number;
   totalLoss: number;
   netProfitLoss: number;
+  realizedProfitLoss: number;
+  unrealizedProfitLoss: number;
+  openQuantity: number;
+  boughtAt: number;
+  averageBuyPrice: number;
+  currentStockPrice: number;
+  openCostBasis: number;
+  positionValueIfSoldNow: number;
+  pnlIfSoldNow: number;
+  returnIfSoldNowPct: number;
+  sessionPnlIfSoldNow: number;
+  priceSource: string;
+  paperCash?: number;
+  paperPortfolioValue?: number;
+  marketError?: string | null;
   trades: Trade[];
   isCurrent?: boolean;
   startTimestamp?: string | null;
@@ -67,15 +83,17 @@ export function HistoryPage() {
   }, []);
 
   useEffect(() => {
-    const fetchSessions = async () => {
+    let active = true;
+
+    const fetchSessions = async (showLoading = false) => {
       if (!dbUserId) {
-        setLoading(false);
+        if (active) setLoading(false);
         return;
       }
 
       try {
-        setLoading(true);
-        setError(null);
+        if (showLoading) setLoading(true);
+        if (active) setError(null);
 
         const response = await apiFetch(`/api/sessions?user_id=${dbUserId}`);
 
@@ -85,37 +103,32 @@ export function HistoryPage() {
 
         const data: SessionsResponse = await response.json();
 
-        const mappedSessions: Session[] = data.sessions.map((session) => {
-          const pnl = Number(session.pnl || 0);
+        const mappedSessions: Session[] = await Promise.all(data.sessions.map(async (session) => {
+          const performance = await fetchSessionPerformance(session.id);
+          return mapSession(session, performance);
+        }));
 
-          return {
-            id: String(session.id),
-            date: formatDate(session.start_timestamp),
-            duration: "00:00:00",
-            totalProfit: pnl > 0 ? pnl : 0,
-            totalLoss: pnl < 0 ? Math.abs(pnl) : 0,
-            netProfitLoss: pnl,
-            isCurrent: session.status === "ACTIVE",
-            startTimestamp: session.start_timestamp,
-            stopTimestamp: session.stop_timestamp,
-            trades: [],
-          };
-        });
+        if (!active) return;
 
         setSessions(mappedSessions);
-
         if (mappedSessions.length > 0) {
-          setExpandedSessionId(mappedSessions[0].id);
+          setExpandedSessionId((current) => current ?? mappedSessions[0].id);
         }
       } catch (err) {
         console.error("Error fetching history sessions:", err);
-        setError("Could not load trading history.");
+        if (active) setError("Could not load trading history.");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
-    fetchSessions();
+    fetchSessions(true);
+    const intervalId = window.setInterval(() => fetchSessions(false), 10000);
+
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+    };
   }, [dbUserId]);
 
   const formatDuration = (seconds: number) => {
@@ -225,14 +238,18 @@ export function HistoryPage() {
                   </div>
 
                   <div>
-                    <p className="mb-1 text-sm text-gray-600">Total Profit</p>
+                    <p className="mb-1 text-sm text-gray-600">
+                      Profit If Sold
+                    </p>
                     <p className="text-lg font-semibold text-green-600">
                       ${session.totalProfit.toFixed(2)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="mb-1 text-sm text-gray-600">Total Loss</p>
+                    <p className="mb-1 text-sm text-gray-600">
+                      Loss If Sold
+                    </p>
                     <p className="text-lg font-semibold text-red-600">
                       ${session.totalLoss.toFixed(2)}
                     </p>
@@ -240,7 +257,7 @@ export function HistoryPage() {
 
                   <div>
                     <p className="mb-1 text-sm text-gray-600">
-                      Net Profit/Loss
+                      Net If Sold Now
                     </p>
                     <div
                       className={`flex items-center gap-1 text-lg font-bold ${
@@ -258,6 +275,30 @@ export function HistoryPage() {
                     </div>
                   </div>
                 </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-4 border-t border-gray-200 pt-5 md:grid-cols-6">
+                  <Metric label="Open Qty" value={formatQuantity(session.openQuantity)} />
+                  <Metric label="Bought At" value={formatMoney(session.boughtAt)} />
+                  <Metric label="Current Price" value={formatMoney(session.currentStockPrice)} />
+                  <Metric label="Cost Basis" value={formatMoney(session.openCostBasis)} />
+                  <Metric label="Value If Sold" value={formatMoney(session.positionValueIfSoldNow)} />
+                  <Metric
+                    label="P/L If Sold"
+                    value={`${formatSignedMoney(session.pnlIfSoldNow)} (${formatSignedPercent(
+                      session.returnIfSoldNowPct
+                    )})`}
+                    tone={session.pnlIfSoldNow >= 0 ? "profit" : "loss"}
+                  />
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-gray-500">
+                  <span>Price source: {session.priceSource}</span>
+                  {session.paperCash !== undefined && <span>Paper cash: {formatMoney(session.paperCash)}</span>}
+                  {session.paperPortfolioValue !== undefined && (
+                    <span>Paper portfolio: {formatMoney(session.paperPortfolioValue)}</span>
+                  )}
+                  {session.marketError && <span>Live market fallback: {session.marketError}</span>}
+                </div>
               </div>
 
               {expandedSessionId === session.id && (
@@ -268,7 +309,7 @@ export function HistoryPage() {
 
                   {session.trades.length === 0 ? (
                     <p className="text-sm text-gray-600">
-                      Trades will be loaded in the next step.
+                      No trades recorded for this session yet.
                     </p>
                   ) : (
                     <div className="overflow-x-auto">
@@ -283,6 +324,9 @@ export function HistoryPage() {
                             </th>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                               Amount
+                            </th>
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                              Notional
                             </th>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                               Price
@@ -313,11 +357,15 @@ export function HistoryPage() {
                               </td>
 
                               <td className="px-4 py-3 text-sm text-gray-600">
-                                {trade.amount}
+                                {formatQuantity(trade.amount)}
                               </td>
 
                               <td className="px-4 py-3 text-sm text-gray-600">
-                                ${trade.price.toLocaleString()}
+                                {formatMoney(trade.notional)}
+                              </td>
+
+                              <td className="px-4 py-3 text-sm text-gray-600">
+                                {formatMoney(trade.price)}
                               </td>
                             </tr>
                           ))}
@@ -344,5 +392,100 @@ function formatDate(value: string | null) {
     month: "long",
     day: "numeric",
     year: "numeric",
+  });
+}
+
+function mapSession(session: BackendSession, performance: SessionPerformanceResponse): Session {
+  const totalPnl = Number(performance.performance.session_pnl_if_sold_now);
+
+  return {
+    id: String(session.id),
+    date: formatDate(session.start_timestamp),
+    duration: "00:00:00",
+    totalProfit: Math.max(totalPnl, 0),
+    totalLoss: Math.max(-totalPnl, 0),
+    netProfitLoss: totalPnl,
+    realizedProfitLoss: Number(performance.performance.realized_pnl),
+    unrealizedProfitLoss: Number(performance.performance.unrealized_pnl),
+    openQuantity: Number(performance.performance.open_quantity),
+    boughtAt: Number(performance.performance.bought_at),
+    averageBuyPrice: Number(performance.performance.average_buy_price),
+    currentStockPrice: Number(performance.performance.current_stock_price),
+    openCostBasis: Number(performance.performance.open_cost_basis),
+    positionValueIfSoldNow: Number(performance.performance.position_value_if_sold_now),
+    pnlIfSoldNow: Number(performance.performance.pnl_if_sold_now),
+    returnIfSoldNowPct: Number(performance.performance.return_if_sold_now_pct),
+    sessionPnlIfSoldNow: Number(performance.performance.session_pnl_if_sold_now),
+    priceSource: performance.price_source,
+    paperCash: performance.account ? Number(performance.account.cash) : undefined,
+    paperPortfolioValue: performance.account ? Number(performance.account.portfolio_value) : undefined,
+    marketError: performance.market_error,
+    isCurrent: session.status === "ACTIVE",
+    startTimestamp: session.start_timestamp,
+    stopTimestamp: session.stop_timestamp,
+    trades: performance.trades.map(formatTrade),
+  };
+}
+
+function formatTrade(trade: SessionPerformanceResponse["trades"][number]): Trade {
+  const amount = Number(trade.quantity);
+  const price = Number(trade.price);
+
+  return {
+    id: trade.id,
+    time: trade.timestamp ? new Date(trade.timestamp).toLocaleString() : "Unknown",
+    action: trade.type === "BUY" ? "Buy" : "Sell",
+    amount,
+    price,
+    notional: amount * price,
+  };
+}
+
+function Metric({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: "profit" | "loss";
+}) {
+  const color =
+    tone === "profit" ? "text-green-600" : tone === "loss" ? "text-red-600" : "text-gray-900";
+
+  return (
+    <div>
+      <p className="mb-1 text-sm text-gray-600">{label}</p>
+      <p className={`text-base font-semibold ${color}`}>{value}</p>
+    </div>
+  );
+}
+
+function formatMoney(value: number) {
+  if (!Number.isFinite(value)) return "$0.00";
+  return value.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatSignedMoney(value: number) {
+  const formatted = formatMoney(Math.abs(value));
+  if (!Number.isFinite(value) || value === 0) return formatted;
+  return `${value > 0 ? "+" : "-"}${formatted}`;
+}
+
+function formatSignedPercent(value: number) {
+  if (!Number.isFinite(value) || value === 0) return "0.00%";
+  return `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
+}
+
+function formatQuantity(value: number) {
+  if (!Number.isFinite(value)) return "0";
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 8,
   });
 }
