@@ -4,6 +4,7 @@ from utils.auth import firebase_auth_required, admin_only
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from decimal import Decimal
+from trading_execution import DEFAULT_SYMBOL, TradingExecutionError, get_session_performance
 
 sessions_bp = Blueprint('sessions', __name__, url_prefix='/api/sessions')
 
@@ -120,6 +121,19 @@ def get_session(session_id):
 
         return jsonify(format_session_response(session)), 200
 
+    except Exception as e:
+        return jsonify({'error': 'An error occurred: ' + str(e)}), 500
+
+
+@sessions_bp.route('/<int:session_id>/performance', methods=['GET'])
+@firebase_auth_required
+def get_performance(session_id):
+    """Get mark-to-market session performance using recorded trades and latest price."""
+    symbol = request.args.get('symbol', DEFAULT_SYMBOL)
+    try:
+        return jsonify(get_session_performance(session_id, symbol=symbol)), 200
+    except TradingExecutionError as e:
+        return jsonify({'error': str(e)}), 400
     except Exception as e:
         return jsonify({'error': 'An error occurred: ' + str(e)}), 500
 

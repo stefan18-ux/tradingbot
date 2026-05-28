@@ -1,0 +1,65 @@
+{
+  "kind": "active_supervised_cash_asset_policy",
+  "source_data": "/Users/cris/Documents/poli_3/sem2/ip/tradingbot/model-dev/training/big_training.csv",
+  "window_size": 30,
+  "lookahead": 60,
+  "positive_return_threshold": 0.0002,
+  "epochs": 10,
+  "best_epoch": 7,
+  "feature_columns": [
+    "ret_1m",
+    "ret_5m",
+    "ret_15m",
+    "ret_30m",
+    "rsi",
+    "vwap_dist",
+    "bb_pos",
+    "volume_ratio",
+    "trade_count_ratio",
+    "trend"
+  ],
+  "class_labels": {
+    "0": "CASH",
+    "1": "ASSET"
+  },
+  "train": {
+    "accuracy": 0.5136347142261386,
+    "precision_asset": 0.49731066592021994,
+    "recall_asset": 0.7881248385611446,
+    "f1_asset": 0.609821164775196,
+    "asset_ratio": 0.7642643211889146,
+    "mean_confidence": 0.5259178876876831,
+    "pnl_pct": -0.871636238839835,
+    "buy_count": 5813,
+    "sell_count": 5813,
+    "position_flips": 11626
+  },
+  "validation": {
+    "accuracy": 0.4931884241122204,
+    "precision_asset": 0.4761484964247233,
+    "recall_asset": 0.7844118121671777,
+    "f1_asset": 0.59258807753261,
+    "asset_ratio": 0.7740932642487046,
+    "mean_confidence": 0.5262712240219116,
+    "pnl_pct": -0.3631351962050361,
+    "buy_count": 1121,
+    "sell_count": 1122,
+    "position_flips": 2243
+  },
+  "test": {
+    "accuracy": 0.4941616539453066,
+    "precision_asset": 0.4754573269969403,
+    "recall_asset": 0.7893115746244461,
+    "f1_asset": 0.5934427561550337,
+    "asset_ratio": 0.7764747510488803,
+    "mean_confidence": 0.5267069339752197,
+    "pnl_pct": -0.34862971923025166,
+    "buy_count": 1135,
+    "sell_count": 1134,
+    "position_flips": 2269
+  },
+  "calibration": {
+    "asset_logit_bias": 0.25,
+    "reason": "Long-biased active paper-trading calibration so the policy places trades instead of defaulting to CASH."
+  }
+}

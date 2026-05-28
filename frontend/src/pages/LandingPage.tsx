@@ -13,10 +13,12 @@ import { useAuth } from "../contexts/AuthContext";
 
 export function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [loginError, setLoginError] = useState("");
   const { loginWithGoogle, currentUser } = useAuth();
   const navigate = useNavigate();
 
   async function handleGoogleLogin() {
+    setLoginError("");
     try {
       if (currentUser) {
         navigate("/dashboard");
@@ -26,6 +28,7 @@ export function LandingPage() {
       navigate("/dashboard");
     } catch (err: any) {
       if (err?.code !== "auth/popup-closed-by-user") {
+        setLoginError(err?.code || "Google login failed");
         console.error("Google login error:", err);
       }
     }
@@ -88,6 +91,11 @@ export function LandingPage() {
             with advanced risk management, 24/7 monitoring, and proven
             strategies.
           </p>
+          {loginError && (
+            <div className="mb-4 mx-auto max-w-md rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {loginError}
+            </div>
+          )}
           <button
             onClick={handleGoogleLogin}
             className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold shadow-lg hover:shadow-xl transition flex items-center mx-auto gap-2"

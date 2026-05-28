@@ -6,3 +6,6 @@ python-dotenv
 cryptography
 flask-cors
 firebase-admin
+numpy
+pandas
+alpaca-py

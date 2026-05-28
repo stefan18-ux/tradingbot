@@ -1,3 +1,4 @@
+import os
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
@@ -11,7 +12,12 @@ class DownloadData:
         self.startdate = startdate
     
     def fetch(self):
-        client = StockHistoricalDataClient("PKRUT554WVBY2CQV2XY7EG6HTY", "FzZfBvstVyk1mgFDAufDGEsZGncr9xX6CYKCNEwhC15T")
+        api_key = os.getenv("ALPACA_API_KEY")
+        api_secret = os.getenv("ALPACA_API_SECRET")
+        if not api_key or not api_secret:
+            raise RuntimeError("Set ALPACA_API_KEY and ALPACA_API_SECRET before downloading data")
+
+        client = StockHistoricalDataClient(api_key, api_secret)
 
         request_params = StockBarsRequest(
             symbol_or_symbols=self.tickers,

@@ -9,6 +9,8 @@ Provides decorators to protect routes:
 """
 
 import os
+import threading
+from pathlib import Path
 import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth
 from flask import request, jsonify, g
@@ -17,6 +19,7 @@ from functools import wraps
 # Initialize Firebase Admin SDK
 # Uses GOOGLE_APPLICATION_CREDENTIALS env var or a service account JSON path
 _firebase_app = None
+_firebase_app_lock = threading.Lock()
 
 
 def _get_firebase_app():
@@ -25,14 +28,31 @@ def _get_firebase_app():
     if _firebase_app is not None:
         return _firebase_app
 
-    service_account_path = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
-    if service_account_path and os.path.exists(service_account_path):
-        cred = credentials.Certificate(service_account_path)
-        _firebase_app = firebase_admin.initialize_app(cred)
-    else:
-        # Fallback to project ID (sufficient for verifying tokens)
-        project_id = os.getenv('FIREBASE_PROJECT_ID', 'tradingbot-c0986')
-        _firebase_app = firebase_admin.initialize_app(options={'projectId': project_id})
+    with _firebase_app_lock:
+        if _firebase_app is not None:
+            return _firebase_app
+
+        try:
+            _firebase_app = firebase_admin.get_app()
+            return _firebase_app
+        except ValueError:
+            pass
+
+        service_account_path = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
+        if service_account_path:
+            resolved_path = Path(service_account_path)
+            if not resolved_path.is_absolute():
+                resolved_path = Path(__file__).resolve().parent.parent / resolved_path
+        else:
+            resolved_path = None
+
+        if resolved_path and resolved_path.exists():
+            cred = credentials.Certificate(str(resolved_path))
+            _firebase_app = firebase_admin.initialize_app(cred)
+        else:
+            # Fallback to project ID (sufficient for verifying tokens)
+            project_id = os.getenv('FIREBASE_PROJECT_ID', 'tradingbot-c0986')
+            _firebase_app = firebase_admin.initialize_app(options={'projectId': project_id})
 
     return _firebase_app
 

@@ -161,4 +161,4 @@ TSLA = Instrument('TSLA', 2, 'Tesla stock')
 AMZN = Instrument('AMZN', 2, 'Amazon stock')
 
 # ETFs
-QQQ = Instrument('QQQ', 2, 'QQQ etf')
+QQQ = Instrument('QQQ', 6, 'QQQ ETF')
